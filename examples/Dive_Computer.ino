@@ -34,7 +34,7 @@ void loop() {
   decoUpdate(pressureAtm, dtMin);
 
   // Optional: disable gradient factors, this will force GF to 100% and remove conservatism
-  // mad_man_mode(true);
+  // ripNtear(true);
 
   // Query model output
   DecoResult result = decoCompute(pressureAtm);

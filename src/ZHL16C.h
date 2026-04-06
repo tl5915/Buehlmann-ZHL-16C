@@ -29,9 +29,9 @@ void decoUpdate(float pressureAtm, float dtMin);
 // currentPressureAtm: ambient pressure in atm.
 DecoResult decoCompute(float currentPressureAtm);
 
-// ----- Mad Man Mode ----- //
+// ----- Rip & Tear Mode ----- //
 // Disable/enable gradient factor
 // Default to false (disabled): GF settings apply
 // Set to true (enabled): ignore GF settings and force 100% GF (removes all conservatism, raw Bühlmann ZHL-16C algorithm)
 // Can be called in the middle of a dive if you find deco boring and want to ride the M-value train
-void mad_man_mode(bool enabled);
+void ripNtear(bool enabled);

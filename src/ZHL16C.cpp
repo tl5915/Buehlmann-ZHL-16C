@@ -46,7 +46,7 @@ static float gfHigh = 0.85f;      // GF HIGH 85
 static float po2Setpoint = 1.2f;  // Setpoint 1.2
 
 // Gradient factor enabled/disabled
-static bool sanity = true;
+static bool gfEnabled = true;
 
 // Convert atm to depth in meters
 static inline float depthFromPressureAtm(float pressureAtm) {
@@ -159,8 +159,8 @@ bool decoSetup(uint8_t gfLowPercent, uint8_t gfHighPercent, float po2InputSetpoi
 
 // Disable/enable gradient factor
 // Input: enabled = true to disable GF settings and force 100% GF
-void mad_man_mode(bool enabled) {
-    sanity = !enabled;
+void ripNtear(bool enabled) {
+    gfEnabled = !enabled;
 }
 
 // Initialise tissue compartments
@@ -191,7 +191,7 @@ DecoResult decoCompute(float currentPressureAtm) {
     const uint16_t surfGF = static_cast<uint16_t>(lroundf(surfaceGfPercent(n2)));
 
     // Find the deepest stop
-    const float firstCeilGf = sanity ? gfLow : 1.0f;
+    const float firstCeilGf = gfEnabled ? gfLow : 1.0f;
     const float rawCeil = ceilDepth(n2, firstCeilGf);
     uint16_t dFirst = 0;
     if (rawCeil > 0.1f) {
@@ -216,7 +216,7 @@ DecoResult decoCompute(float currentPressureAtm) {
 
     while (dStop > 0.0f) {
         const float dNext = (dStop <= 3.0f) ? 0.0f : dStop - 3.0f;
-        const float gfNext = sanity ? gfAt(dNext, static_cast<float>(dFirst)) : 1.0f;
+        const float gfNext = gfEnabled ? gfAt(dNext, static_cast<float>(dFirst)) : 1.0f;
 
         // Wait at stop until ceiling clear to next stop
         uint16_t stopMin = 0;

@@ -1,23 +1,6 @@
 {
   "name": "Buehlmann ZHL-16C",
-  "version": "1.0.0",
-  "description": "Buehlmann ZHL-16C decompression model for Arduino/PlatformIO",
-  "build": {
-    "includeDir": "src",
-    "srcDir": "src"
-  },
-  "frameworks": [
-    "arduino"
-  ],
-  "platforms": [
-    "*"
-  ]
-}
-
-
-{
-  "name": "Buehlmann ZHL-16C",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Buehlmann ZHL-16C decompression model for DIY dive computer",
   "keywords": "arduino, dive, scuba, ZHL16, Buehlmann, Buhlmann",
   "repository": {

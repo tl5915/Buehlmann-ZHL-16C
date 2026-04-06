@@ -18,7 +18,6 @@ This library provides a compact Bühlmann ZHL-16C decompression model API for DI
 - Input **ambient pressure in atm** (float) from pressure sensor reading
 - Input dive time in **minutes** (float)
 
-
 ## Functions
 
 ### `bool decoSetup(uint8_t gfLowPercent, uint8_t gfHighPercent, float po2Setpoint)`
@@ -30,12 +29,10 @@ Configures gradient factors and the CCR oxygen setpoint.- `gfLowPercent`: intege
 - Returns `true` when the configuration is accepted
 - If no valid input, model defaults to **GF 60/85** and **setpoint 1.2**
 
-
 ### `void decoInit()`
 
 Initialises all tissue compartments to surface equilibrium.
 Call after `decoSetup()` at startup or at the begining of the dive.
-
 
 ### `void decoUpdate(float pressureAtm, float dtMin)`
 
@@ -45,7 +42,6 @@ Updates tissue compartments for dive time at ambient pressure.
 - `dtMin`: dive time in **minutes**
 
 Call this regularly in control loop, e.g. every second.
-
 
 ### `DecoResult decoCompute(float currentPressureAtm)`
 
@@ -61,14 +57,14 @@ Computes current decompression output.
 
 Call this when decompression needs to be calculated, e.g. every 10 seconds.
 
-### `void mad_man_mode(bool enabled)`
+### `ripNtear(bool enabled)`
 
 Disable or enable gradient factor.
 
 - `false`: normal decompression behavior, with conservatism by pre-set gradient factors
 - `true`: ignore GF settings and force 100% GF (removes all conservatism, raw Bühlmann ZHL-16C algorithm)
 
-Can be called in the middle of a dive if you find deco boring and want to ride the M-value train
+Default to false. Can be called in the middle of a dive if you find deco boring and want to ride the M-value train
 
 ## Typical Usage
 
@@ -77,4 +73,5 @@ Can be called in the middle of a dive if you find deco boring and want to ride t
 3. Call `decoUpdate(pressureAtm, dtMin)` in `loop()`
 4. Call `decoCompute(pressureAtm)` at your display/log interval
 5. Use fields in `DecoResult` to get Deco, Stop, Time, TTS, surfGF
-6. Toggle `mad_man_mode(true)` to see decompression result at raw M-value
+6. Toggle `ripNtear(true)` to see decompression result at raw M-value
+
