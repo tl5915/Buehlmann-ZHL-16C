@@ -1,0 +1,15 @@
+{
+  "name": "Buehlmann ZHL-16C",
+  "version": "1.0.0",
+  "description": "Buehlmann ZHL-16C decompression model for Arduino/PlatformIO",
+  "build": {
+    "includeDir": "src",
+    "srcDir": "src"
+  },
+  "frameworks": [
+    "arduino"
+  ],
+  "platforms": [
+    "*"
+  ]
+}
