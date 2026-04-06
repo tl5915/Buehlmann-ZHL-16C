@@ -13,3 +13,24 @@
     "*"
   ]
 }
+
+
+{
+  "name": "Buehlmann ZHL-16C",
+  "version": "1.0.0",
+  "description": "Buehlmann ZHL-16C decompression model for DIY dive computer",
+  "keywords": "arduino, dive, scuba, ZHL16, Buehlmann, Buhlmann",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tl5915/Buehlmann-ZHL-16C"
+  },
+  "authors": [
+    {
+      "name": "tongl",
+      "maintainer": true
+    }
+  ],
+  "license": "MIT",
+  "frameworks": "*",
+  "platforms": "*"
+}
