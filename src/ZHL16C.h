@@ -10,28 +10,41 @@ struct DecoResult {
 };
 
 // ----- Configure model parameters ----- //
-// gfLowPercent: GF Low (%), integer percent, must be > 0 and < gfHighPercent
-// gfHighPercent: GF High (%), integer percent, must be <= 100
-// po2Setpoint: CCR setpoint (PPO2 ata), must be > 0
+/*
+gfLowPercent: GF Low (%), integer percent, must be > 0 and < gfHighPercent
+gfHighPercent: GF High (%), integer percent, must be <= 100
+po2Setpoint: CCR setpoint (PPO2 ata), must be > 0
+Returns true if all input values are valid
+If not set, default to GF 60/85, setpoint 1.2
+*/
 bool decoSetup(uint8_t gfLowPercent, uint8_t gfHighPercent, float po2Setpoint);
-// Returns true if all input values are valid
-// If not set, default to GF 60/85, setpoint 1.2
+
 
 // ----- Initialise tissue compartments ----- //
 void decoInit();
 
+
 // ----- Update tissue compartments ----- //
-// pressureAtm: ambient pressure in atm
-// dtMin: dive time in minutes
+/*
+pressureAtm: ambient pressure in atm
+dtMin: dive time in minutes
+*/
 void decoUpdate(float pressureAtm, float dtMin);
 
+
 // ----- Compute decompression stops ----- //
-// currentPressureAtm: ambient pressure in atm.
+/*
+currentPressureAtm: ambient pressure in atm
+*/
 DecoResult decoCompute(float currentPressureAtm);
 
+
 // ----- Rip & Tear Mode ----- //
-// Disable/enable gradient factor
-// Default to false (disabled): GF settings apply
-// Set to true (enabled): ignore GF settings and force 100% GF (removes all conservatism, raw Bühlmann ZHL-16C algorithm)
-// Can be called in the middle of a dive if you find deco boring and want to ride the M-value train
+/*
+Disable/enable gradient factor
+Default to false (disabled): GF settings apply
+Set to true (enabled): ignore GF settings and force 100% GF
+(removes all conservatism, raw Bühlmann ZHL-16C algorithm)
+Can be called in the middle of a dive if you find deco boring and want to ride the M-value train
+*/
 void ripNtear(bool enabled);
