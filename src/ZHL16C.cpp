@@ -239,5 +239,6 @@ DecoResult decoCompute(float currentPressureAtm) {
         simAscent(n2, dStop, dNext, &totalMin);
         dStop = dNext;
     }
+    if (firstStopMin == 0) firstStopMin = 1;  // Minimum stop 1min
     return {true, dFirst, firstStopMin, totalMin, surfGF};
 }
