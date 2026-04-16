@@ -28,7 +28,7 @@ void loop() {
   // Example profile
   float depthMeters = 18.0f;  // Current depth reading from pressure sensor
   float pressureAtm = pressureAtmFromDepth(depthMeters);  // Convert depth to atm for model input
-  float dtMin = 16.5;  // Dive time in minutes
+  float dtMin = 0.5;  // Delta time since last update in minutes
 
   // Update model with current depth and time
   decoUpdate(pressureAtm, dtMin);
@@ -47,14 +47,6 @@ void loop() {
   u_int16_t surfGF = result.surfGF;
 
   // Print results
-  Serial.print("Dive Time: ");
-  Serial.print(dtMin);
-  Serial.println(" min");
-
-  Serial.print("Depth: ");
-  Serial.print(depthMeters);
-  Serial.println(" m");
-
   if (inDeco) {
     Serial.println("DECO");
   } else {

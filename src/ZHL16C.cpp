@@ -172,7 +172,7 @@ void decoInit() {
 }
 
 // Update tissue compartments
-// Input: current ambient pressure (atm), current dive time (min)
+// Input: current ambient pressure (atm), delta time since last update (min)
 void decoUpdate(float pressureAtm, float dtMin) {
     if (dtMin > 0.0f) {
         tickTissuesAmbient(N2, pressureAtm, dtMin);
