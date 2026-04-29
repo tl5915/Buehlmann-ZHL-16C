@@ -19,7 +19,6 @@ If not set, default to GF 60/85, setpoint 1.2
 */
 bool decoSetup(uint8_t gfLowPercent, uint8_t gfHighPercent, float po2Setpoint);
 
-
 // ----- Initialise tissue compartments ----- //
 void decoInit();
 
@@ -39,6 +38,19 @@ currentPressureAtm: ambient pressure in atm
 DecoResult decoCompute(float currentPressureAtm);
 
 
+// ----- Change last-stop depth ----- //
+/*
+Default to false (disabled): last stop at 3m
+If enabled: last stop at 6 m
+*/
+void setLastStop6m(bool enabled);
+
+// ----- Change PO2 setpoint ----- //
+/*
+Change setpoint during the dive: returns true if valid setpoint (> 0) is applied
+*/
+bool setPo2Setpoint(float po2);
+
 // ----- Rip & Tear Mode ----- //
 /*
 Disable/enable gradient factor
@@ -48,3 +60,8 @@ Set to true (enabled): ignore GF settings and force 100% GF
 Can be called in the middle of a dive if you find deco boring and want to ride the M-value train
 */
 void ripNtear(bool enabled);
+
+// ----- Query current settings ----- //
+void getGradientFactors(float *gfLowPercent, float *gfHighPercent);  // Get current gradient factors
+
+float getPo2Setpoint(void);  // Get current PO2 setpoint

@@ -1,10 +1,9 @@
 // Buhlmann ZHL-16C model
-// CC mode single set point
 // No helium penalty
 // Assume ascent at 9 m/min
-// Assume 3 m stops and last stop at 3 m
 // Assume no prior dives
 // Assume sea level
+// Assume EN13319 standard 1020 kg/m³ water density 
 
 #include "ZHL16C.h"
 #include <math.h>
@@ -41,12 +40,13 @@ static constexpr float METERS_PER_ATM = ATM_PRESSURE_PA / (SEAWATER_DENSITY * GR
 static float N2[16];
 
 // Default model parameters
-static float gfLow = 0.60f;       // GF LOW 60
-static float gfHigh = 0.85f;      // GF HIGH 85
+static float gfLow = 0.60f;       // GF Low 60
+static float gfHigh = 0.85f;      // GF High 85
 static float po2Setpoint = 1.2f;  // Setpoint 1.2
 
-// Gradient factor enabled/disabled
-static bool gfEnabled = true;
+// User defined options
+static bool gfEnabled = true;  // Enabled/disabled gradient factor 
+static bool lastStopAt6m = false;  // Enabled/disabled last stop at 6m instead of 3m
 
 // Convert atm to depth in meters
 static inline float depthFromPressureAtm(float pressureAtm) {
@@ -157,12 +157,6 @@ bool decoSetup(uint8_t gfLowPercent, uint8_t gfHighPercent, float po2InputSetpoi
     return true;
 }
 
-// Disable/enable gradient factor
-// Input: enabled = true to disable GF settings and force 100% GF
-void ripNtear(bool enabled) {
-    gfEnabled = !enabled;
-}
-
 // Initialise tissue compartments
 void decoInit() {
     const float ppN2Surf = (SURFACE_ATM - WATER_VAPOR) * N2_FRAC_AIR;
@@ -215,7 +209,8 @@ DecoResult decoCompute(float currentPressureAtm) {
     float dStop = static_cast<float>(dFirst);
 
     while (dStop > 0.0f) {
-        const float dNext = (dStop <= 3.0f) ? 0.0f : dStop - 3.0f;
+        const float shallowestStop = lastStopAt6m ? 6.0f : 3.0f;
+        const float dNext = (dStop <= shallowestStop) ? 0.0f : dStop - 3.0f;
         const float gfNext = gfEnabled ? gfAt(dNext, static_cast<float>(dFirst)) : 1.0f;
 
         // Wait at stop until ceiling clear to next stop
@@ -241,4 +236,32 @@ DecoResult decoCompute(float currentPressureAtm) {
     }
     if (firstStopMin == 0) firstStopMin = 1;  // Minimum stop 1min
     return {true, dFirst, firstStopMin, totalMin, surfGF};
+}
+
+// Enable/disable final last stop at 6m instead of 3m
+void setLastStop6m(bool enabled) {
+    lastStopAt6m = enabled;
+}
+
+// Change PO2 setpoint
+bool setPo2Setpoint(float po2) {
+    if (po2 <= 0.0f) return false;
+    po2Setpoint = po2;
+    return true;
+}
+
+// Disable/enable gradient factor
+void ripNtear(bool enabled) {
+    gfEnabled = !enabled;  // Input: enabled = true to disable GF settings and force 100% GF
+}
+
+// Get current gradient factors
+void getGradientFactors(float *gfLowPercent, float *gfHighPercent) {
+    if (gfLowPercent) *gfLowPercent = gfLow * 100.0f;
+    if (gfHighPercent) *gfHighPercent = gfHigh * 100.0f;
+}
+
+// Get current PO2 setpoint
+float getPo2Setpoint(void) {
+    return po2Setpoint;
 }
