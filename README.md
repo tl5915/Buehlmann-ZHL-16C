@@ -4,7 +4,7 @@ This library provides a compact Bühlmann ZHL-16C decompression model API for DI
 
 ## Model Assumptions
 
-- Closed circuit mode with fixed PPO2 setpoint (I might implement open circuit in the future)
+- Supports both closed circuit (fixed PPO2 setpoint) and open circuit (fixed FiO2)
 - Air diluent, not considering helium penalty
 - Ascent rate 9 m/min
 - Stops in 3 m intervals, last stop at 3 m
@@ -20,7 +20,7 @@ This library provides a compact Bühlmann ZHL-16C decompression model API for DI
 
 ## Functions
 
-### `bool decoSetup(uint8_t gfLowPercent, uint8_t gfHighPercent, float po2Setpoint)`
+### `bool decoSetupCC(uint8_t gfLowPercent, uint8_t gfHighPercent, float po2Setpoint)`
 
 Configures gradient factors and the CCR oxygen setpoint.- `gfLowPercent`: integer percent, must be `> 0` and `< gfHighPercent`.
 
@@ -28,6 +28,16 @@ Configures gradient factors and the CCR oxygen setpoint.- `gfLowPercent`: intege
 - `po2Setpoint`: float, must be `> 0`
 - Returns `true` when the configuration is accepted
 - If no valid input, model defaults to **GF 60/85** and **setpoint 1.2**
+
+### `bool decoSetupOC(uint8_t gfLowPercent, uint8_t gfHighPercent, float fiO2)`
+
+Configures gradient factors and open-circuit gas.
+
+- `gfLowPercent`: integer percent, must be `> 0` and `< gfHighPercent`
+- `gfHighPercent`: integer percent, must be `<= 100`
+- `fiO2`: oxygen fraction as float, must be `>= 0` and `<= 1`
+- Returns `true` when the configuration is accepted
+- If no valid input, model defaults to **GF 60/85** and **FiO2 0.2098 (air)**
 
 ### `void decoInit()`
 
@@ -66,12 +76,23 @@ Disable or enable gradient factor.
 
 Default to false. Can be called in the middle of a dive if you find deco boring and want to ride the M-value train
 
+### `bool setPo2Setpoint(float po2)`
+
+Sets a new CCR setpoint (`> 0`) and switches gas model to CCR mode.
+
+### `bool setFiO2(float fiO2)`
+
+Sets a new OC gas FiO2 (`>= 0` and `<= 1`) and switches gas model to OC mode.
+
+### `float getPo2Setpoint()` / `float getFiO2()` / `bool isOCmode()`
+
+Query current gas model settings.
+
 ## Typical Usage
 
-1. Call `decoSetup(gfLowPercent, gfHighPercent, po2Setpoint)` in `setup()`
+1. Call `decoSetupCC(gfLowPercent, gfHighPercent, po2Setpoint)` for CCR or `decoSetupOC(gfLowPercent, gfHighPercent, fiO2)` for OC in `setup()`
 2. Call `decoInit()` once right after
 3. Call `decoUpdate(pressureAtm, dtMin)` in `loop()`
 4. Call `decoCompute(pressureAtm)` at your display/log interval
 5. Use fields in `DecoResult` to get Deco, Stop, Time, TTS, surfGF
 6. Toggle `ripNtear(true)` to see decompression result at raw M-value
-

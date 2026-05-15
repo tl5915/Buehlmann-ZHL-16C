@@ -17,7 +17,16 @@ po2Setpoint: CCR setpoint (PPO2 ata), must be > 0
 Returns true if all input values are valid
 If not set, default to GF 60/85, setpoint 1.2
 */
-bool decoSetup(uint8_t gfLowPercent, uint8_t gfHighPercent, float po2Setpoint);
+bool decoSetupCC(uint8_t gfLowPercent, uint8_t gfHighPercent, float po2Setpoint);
+
+/*
+gfLowPercent: GF Low (%), integer percent, must be > 0 and < gfHighPercent
+gfHighPercent: GF High (%), integer percent, must be <= 100
+fiO2: Open-circuit fixed oxygen fraction, must be >= 0 and <= 1
+Returns true if all input values are valid
+If not set, default to GF 60/85, FiO2 0.21
+*/
+bool decoSetupOC(uint8_t gfLowPercent, uint8_t gfHighPercent, float fiO2);
 
 // ----- Initialise tissue compartments ----- //
 void decoInit();
@@ -45,11 +54,18 @@ If enabled: last stop at 6 m
 */
 void setLastStop6m(bool enabled);
 
-// ----- Change PO2 setpoint ----- //
+// ----- Change CC PO2 setpoint ----- //
 /*
 Change setpoint during the dive: returns true if valid setpoint (> 0) is applied
 */
 bool setPo2Setpoint(float po2);
+
+// ----- Change OC FiO2 ----- //
+/*
+Change gas FiO2 during the dive: returns true if valid FiO2 (>= 0 and <= 1) is applied
+Switches gas model to open-circuit mode
+*/
+bool setFiO2(float fiO2);
 
 // ----- Rip & Tear Mode ----- //
 /*
@@ -63,5 +79,6 @@ void ripNtear(bool enabled);
 
 // ----- Query current settings ----- //
 void getGradientFactors(float *gfLowPercent, float *gfHighPercent);  // Get current gradient factors
-
 float getPo2Setpoint(void);  // Get current PO2 setpoint
+float getFiO2(void);         // Get current gas FiO2
+bool isOCmode(void);         // Get current mode OC/CC

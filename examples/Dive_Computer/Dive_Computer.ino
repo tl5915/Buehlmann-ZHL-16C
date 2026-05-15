@@ -13,8 +13,8 @@ void setup() {
   Serial.begin(115200);
   delay(10);
 
-  // Configure model parameters: GF Low, GF High, CCR setpoint
-  if (!decoSetup(60, 85, 1.2f)) {
+  // Configure model parameters: GF Low, GF High, open-circuit fixed FiO2
+  if (!decoSetupOpenCircuit(60, 85, 0.21f)) {
     Serial.println("Invalid parameters, default values will be used");
   }
 

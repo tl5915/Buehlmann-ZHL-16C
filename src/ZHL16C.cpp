@@ -30,7 +30,8 @@ static constexpr float ASCENT_RATE = 9.0f;  // Ascent rate m/min
 static constexpr float LN2 = 0.693147f;              // Natural log of 2
 static constexpr float GRAVITY = 9.81f;              // Gravity m/s²
 static constexpr float ATM_PRESSURE_PA = 101325.0f;  // Pa per atm
-static constexpr float N2_FRAC_AIR = 0.7902f;        // FiN2 in air
+static constexpr float FiO2_AIR = 0.2095f;           // FiO2 in air
+static constexpr float FiN2_AIR = 0.7902f;           // FiN2 in air
 static constexpr float WATER_VAPOR = 0.0627f;        // Alveolar water vapour pressure
 static constexpr float SURFACE_ATM = 1.0f;           // 1 atm at surface
 static constexpr float SEAWATER_DENSITY = 1020.0f;   // EN13319 density kg/m³
@@ -43,10 +44,23 @@ static float N2[16];
 static float gfLow = 0.60f;       // GF Low 60
 static float gfHigh = 0.85f;      // GF High 85
 static float po2Setpoint = 1.2f;  // Setpoint 1.2
+static float FiO2 = FiO2_AIR;     // OC default gas: air
+static bool OCmode = false;       // Default mode: CC
 
 // User defined options
 static bool gfEnabled = true;  // Enabled/disabled gradient factor 
 static bool lastStopAt6m = false;  // Enabled/disabled last stop at 6m instead of 3m
+
+static inline bool isValidGfConfig(uint8_t gfLowPercent, uint8_t gfHighPercent) {
+    if (gfLowPercent == 0) return false;
+    if (gfLowPercent >= gfHighPercent) return false;
+    if (gfHighPercent > 100) return false;
+    return true;
+}
+
+static inline bool isValidFiO2(float fiO2) {
+    return (fiO2 >= 0.0f && fiO2 <= 1.0f);
+}
 
 // Convert atm to depth in meters
 static inline float depthFromPressureAtm(float pressureAtm) {
@@ -61,7 +75,12 @@ static inline float pressureAtmFromDepth(float depthM) {
 
 // Alveolar PPN2
 static inline float ppN2AlvFromAmb(float ambientAtm) {
-    const float p = ambientAtm - po2Setpoint - WATER_VAPOR;
+    float p;
+    if (OCmode) {
+        p = (ambientAtm - WATER_VAPOR) * (1.0f - FiO2);
+    } else {
+        p = ambientAtm - po2Setpoint - WATER_VAPOR;
+    }
     return (p < 0.0f) ? 0.0f : p;
 }
 
@@ -143,23 +162,35 @@ static int roundUpToNext3mStop(float depthM) {
 
 // ----- Public API ----- //
 
-// Setup model parameters
+// Setup model parameters for CC
 // Input: GF Low (%), GF High (%), CCR setpoint (PPO2 ata)
 // Output: return false if invalid config: 0 < GF Low < GF High <= 100, setpoint > 0
-bool decoSetup(uint8_t gfLowPercent, uint8_t gfHighPercent, float po2InputSetpoint) {
-    if (gfLowPercent == 0) return false;
-    if (gfLowPercent >= gfHighPercent) return false;
-    if (gfHighPercent > 100) return false;
+bool decoSetupCC(uint8_t gfLowPercent, uint8_t gfHighPercent, float po2InputSetpoint) {
+    if (!isValidGfConfig(gfLowPercent, gfHighPercent)) return false;
     if (po2InputSetpoint <= 0.0f) return false;
     gfLow = static_cast<float>(gfLowPercent) / 100.0f;
     gfHigh = static_cast<float>(gfHighPercent) / 100.0f;
     po2Setpoint = po2InputSetpoint;
+    OCmode = false;
+    return true;
+}
+
+// Setup model parameters for OC
+// Input: GF Low (%), GF High (%), gas FiO2
+// Output: return false if invalid config: 0 < GF Low < GF High <= 100, 0 <= FiO2 <= 1
+bool decoSetupOC(uint8_t gfLowPercent, uint8_t gfHighPercent, float fiO2) {
+    if (!isValidGfConfig(gfLowPercent, gfHighPercent)) return false;
+    if (!isValidFiO2(fiO2)) return false;
+    gfLow = static_cast<float>(gfLowPercent) / 100.0f;
+    gfHigh = static_cast<float>(gfHighPercent) / 100.0f;
+    FiO2 = fiO2;
+    OCmode = true;
     return true;
 }
 
 // Initialise tissue compartments
 void decoInit() {
-    const float ppN2Surf = (SURFACE_ATM - WATER_VAPOR) * N2_FRAC_AIR;
+    const float ppN2Surf = (SURFACE_ATM - WATER_VAPOR) * FiN2_AIR;
     for (int i = 0; i < 16; i++) {
         N2[i] = ppN2Surf;
     }
@@ -247,6 +278,15 @@ void setLastStop6m(bool enabled) {
 bool setPo2Setpoint(float po2) {
     if (po2 <= 0.0f) return false;
     po2Setpoint = po2;
+    OCmode = false;
+    return true;
+}
+
+// Change gas FiO2
+bool setFiO2(float fiO2) {
+    if (!isValidFiO2(fiO2)) return false;
+    FiO2 = fiO2;
+    OCmode = true;
     return true;
 }
 
@@ -264,4 +304,14 @@ void getGradientFactors(float *gfLowPercent, float *gfHighPercent) {
 // Get current PO2 setpoint
 float getPo2Setpoint(void) {
     return po2Setpoint;
+}
+
+// Get current gas FiO2
+float getFiO2(void) {
+    return FiO2;
+}
+
+// Query current mode OC/CC
+bool isOCmode(void) {
+    return OCmode;
 }
